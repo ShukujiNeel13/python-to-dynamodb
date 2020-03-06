@@ -18,16 +18,27 @@ DATA_DICT = {
 }
 
 
-def data_to_dynamodb(raw: any) -> dict:
+def convert_dict_to_dynamodb_type(raw_data: dict):
+    """"""
+
+    converted_dict = {}
+    for key, value in raw_data.items():
+        converted_value = _data_to_dynamodb_type(value)
+        converted_dict[key] = converted_value
+
+    return converted_dict
+
+
+def _data_to_dynamodb_type(raw: any) -> dict:
     """"""
 
     print('Converting given data to DynamoDB item...')
 
     if isinstance(raw, dict):
-        return {"M": {key: data_to_dynamodb(value) for key, value in raw.items()}}
+        return {"M": {key: _data_to_dynamodb_type(value) for key, value in raw.items()}}
 
     elif isinstance(raw, list):
-        return {"L": [data_to_dynamodb(item) for item in raw]}
+        return {"L": [_data_to_dynamodb_type(item) for item in raw]}
 
     elif isinstance(raw, str):
         return {"S": raw}
@@ -46,7 +57,7 @@ def data_to_dynamodb(raw: any) -> dict:
 
 
 if __name__ == '__main__':
-    converted_item = data_to_dynamodb(DATA_DICT)
+    converted_dict = convert_dict_to_dynamodb_type(DATA_DICT)
 
     print('Conversion complete. Item is:')
-    print(pformat(converted_item))
+    print(pformat(converted_dict))
